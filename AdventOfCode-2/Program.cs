@@ -47,7 +47,7 @@ namespace AdventOfCode_2
                 string[] splitline = line.Split(' ');
                 string[] range = splitline[0].Split('-');
                 char letter = splitline[1].Split(':')[0][0];
-                string password = splitline[2];;
+                string password = splitline[2];
                 int count = password.Count(f => f == letter);
 
                 // Challenge 1 rule
