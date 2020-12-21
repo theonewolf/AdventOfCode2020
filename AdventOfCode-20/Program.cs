@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace AdventOfCode_20
 {
@@ -9,6 +10,7 @@ namespace AdventOfCode_20
     {
         private char[][] matrix;
         public long id;
+        public bool oriented;
 
         public Matrix(long tileid, string[] data)
         {
@@ -136,6 +138,33 @@ namespace AdventOfCode_20
             return ret;
         }
 
+        public bool ExactMatched(Matrix other, int direction)
+        {
+            // top, bottom, left, right
+            bool[] ret = { false, false, false, false };
+
+            // match top and bottoms
+            char[] top = matrix[0];
+            char[] bottom = matrix[matrix.Length - 1];
+
+            char[] other_top = other.Top();
+            char[] other_bottom = other.Bottom();
+
+            // match left and right
+            char[] left = Left();
+            char[] right = Right();
+
+            char[] other_left = other.Left();
+            char[] other_right = other.Right();
+
+            ret[0] = top.SequenceEqual(other_bottom);
+            ret[1] = bottom.SequenceEqual(other_top);
+            ret[2] = left.SequenceEqual(other_right);
+            ret[3] = right.SequenceEqual(other_left);
+
+            return ret[direction];
+        }
+
         public override string ToString()
         {
             string ret = "";
@@ -166,6 +195,20 @@ namespace AdventOfCode_20
                 }
             }
             return strings;
+        }
+
+        public string SimpleString()
+        {
+            string retstr = "";
+            for (int i = 0; i < matrix.Length; i++)
+            {
+                for (int j = 0; j < matrix[i].Length; j++)
+                {
+                    retstr += matrix[i][j];
+                }
+                retstr += "\n";
+            }
+            return retstr;
         }
 
         public Matrix ConvertToPart2()
@@ -306,6 +349,7 @@ namespace AdventOfCode_20
             }
         }
 
+        // Equivalent to rotations
         public void VerticalFlip()
         {
             char[][] newMatrix = new char[matrix.Length][];
@@ -324,6 +368,7 @@ namespace AdventOfCode_20
             matrix = newMatrix;
         }
 
+        // Real flip not equivalent to rotations
         public void HorizontalFlip()
         {
             foreach (char[] array in matrix)
@@ -350,10 +395,168 @@ namespace AdventOfCode_20
 
             matrix = newMatrix;
         }
+
+        public static void JointOrient(Matrix corner, Matrix bottom, Matrix right)
+        {
+            bool[] corner_match_bottom = corner.MatchSides(bottom);
+            bool[] corner_match_right = corner.MatchSides(right);
+            bool[] bottom_match_corner = bottom.MatchSides(corner);
+            bool[] right_match_corner = right.MatchSides(corner);
+
+            bool found = false;
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        for (int x = 0; x < 4; x++)
+                        {
+                            for (int y = 0; y < 4; y++)
+                            {
+                                for (int z = 0; z < 4; z++)
+                                {
+                                    if (corner.ExactMatched(bottom, 1) && corner.ExactMatched(right, 3))
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                    bottom.ClockwiseRotate();
+                                }
+                                if (found)
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    right.ClockwiseRotate();
+                                }
+                            }
+                            if (found)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                corner.ClockwiseRotate();
+                            }
+                        }
+                        if (found)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            right.HorizontalFlip();
+                        }
+                    }
+                    if (found)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        bottom.HorizontalFlip();
+                    }
+                }
+                if (found)
+                {
+                    break;
+                }
+                else
+                {
+                    corner.HorizontalFlip();
+                }
+            }
+
+            if (!found)
+            {
+                throw new Exception();
+            }
+        }
+
+        // TODO
+        public static void JointOrientLast(Matrix corner, Matrix top, Matrix left)
+        {
+            bool[] corner_match_top = corner.MatchSides(top);
+            bool[] corner_match_left = corner.MatchSides(left);
+            bool[] top_match_corner = top.MatchSides(corner);
+            bool[] left_match_corner = left.MatchSides(corner);
+
+            bool found = false;
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        for (int x = 0; x < 4; x++)
+                        {
+                            for (int y = 0; y < 4; y++)
+                            {
+                                for (int z = 0; z < 4; z++)
+                                {
+                                    if (corner.ExactMatched(top, 0) && corner.ExactMatched(left, 2))
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                    top.ClockwiseRotate();
+                                }
+                                if (found)
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    left.ClockwiseRotate();
+                                }
+                            }
+                            if (found)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                corner.ClockwiseRotate();
+                            }
+                        }
+                        if (found)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            left.HorizontalFlip();
+                        }
+                    }
+                    if (found)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        top.HorizontalFlip();
+                    }
+                }
+                if (found)
+                {
+                    break;
+                }
+                else
+                {
+                    corner.HorizontalFlip();
+                }
+            }
+
+            if (!found)
+            {
+                    throw new Exception();
+            }
+        }
     }
 
-
-    class Program
+class Program
     {
         static void part1()
         {
@@ -443,49 +646,7 @@ namespace AdventOfCode_20
                 {
                     if ((edges.Contains(m) || corners.Contains(m)) && !clockwise_ordering.Contains(m))
                     {
-                        if (corner == 0) // first row to the right
-                        {
-                            // orient right to left
-                            Matrix.Orient(clockwise_ordering[i - 1], m, new bool[] { false, false, false, true }, new bool[] { false, false, true, false });
-                            Console.WriteLine(" --- DEBUG (R to L) --- ");
-                            Console.WriteLine(clockwise_ordering[i - 1]);
-                            Console.WriteLine(m);
-                        }
-                        else if (corner == 1) // last column down
-                        {
-                            // orient bottom to top
-                            Matrix.Orient(clockwise_ordering[i - 1], m, new bool[] { false, true, false, false }, new bool[] { true, false, false, false });
-                            Console.WriteLine(" --- DEBUG (B to T) --- ");
-                            Console.WriteLine(clockwise_ordering[i - 1]);
-                            Console.WriteLine(m);
-                        }
-                        else if (corner == 2) // last row to the left
-                        {
-                            // orient left to right
-                            Matrix.Orient(clockwise_ordering[i - 1], m, new bool[] { false, false, true, false }, new bool[] { false, false, false, true });
-                            Console.WriteLine(" --- DEBUG (L to R) --- ");
-                            Console.WriteLine(clockwise_ordering[i - 1]);
-                            Console.WriteLine(m);
-                        }
-                        else if (corner == 3) // first column up
-                        {
-                            // orient top to bottom
-                            Matrix.Orient(clockwise_ordering[i - 1], m, new bool[] { true, false, false, false }, new bool[] { false, true, false, false });
-                            Console.WriteLine(" --- DEBUG (T to B) --- ");
-                            Console.WriteLine(clockwise_ordering[i - 1]);
-                            Console.WriteLine(m);
-                        }
-                        else
-                        {
-                            throw new Exception();
-                        }
-
                         clockwise_ordering.Add(m);
-
-                        if (corners.Contains(m))
-                        {
-                            corner++;
-                        }
                         break;
                     }
                 }
@@ -539,8 +700,8 @@ namespace AdventOfCode_20
 
         static string[] string_array_puzzle(Matrix[][] puzzle)
         {
-            List<string> strings = new List<string>(puzzle.Length * puzzle[0][0].SimpleStrings().Count);
-            for (int i = 0; i < puzzle.Length * puzzle[0][0].SimpleStrings().Count; i++)
+            List<string> strings = new List<string>(puzzle.Length * puzzle[0][0].ConvertToPart2().SimpleStrings().Count);
+            for (int i = 0; i < puzzle.Length * puzzle[0][0].ConvertToPart2().SimpleStrings().Count; i++)
             {
                 strings.Add("");
             }
@@ -550,7 +711,7 @@ namespace AdventOfCode_20
                 int k = 0;
                 for (int j = 0; j < puzzle[i].Length; j++)
                 {
-                    List<string> additionalStrings = puzzle[i][j].SimpleStrings();
+                    List<string> additionalStrings = puzzle[i][j].ConvertToPart2().SimpleStrings();
 
                     for (k = 0; k < additionalStrings.Count; k++)
                     {
@@ -565,8 +726,8 @@ namespace AdventOfCode_20
         static string single_string_puzzle(Matrix[][] puzzle)
         {
             string returns = "";
-            List<string> strings = new List<string>(puzzle.Length * puzzle[0][0].SimpleStrings().Count);
-            for (int i = 0; i < puzzle.Length * puzzle[0][0].SimpleStrings().Count; i++)
+            List<string> strings = new List<string>(puzzle.Length * puzzle[0][0].ConvertToPart2().SimpleStrings().Count);
+            for (int i = 0; i < puzzle.Length * puzzle[0][0].ConvertToPart2().SimpleStrings().Count; i++)
             {
                 strings.Add("");
             }
@@ -576,7 +737,7 @@ namespace AdventOfCode_20
                 int k = 0;
                 for (int j = 0; j < puzzle[i].Length; j++)
                 {
-                    List<string> additionalStrings = puzzle[i][j].SimpleStrings();
+                    List<string> additionalStrings = puzzle[i][j].ConvertToPart2().SimpleStrings();
                     for (k = 0; k < additionalStrings.Count; k++)
                     {
                         strings[i * additionalStrings.Count + k] += additionalStrings[k] + "";
@@ -594,7 +755,7 @@ namespace AdventOfCode_20
 
         static void part2()
         {
-            string fileName = @"C:\Users\wolfg\source\repos\AdventofCode2020\AdventofCode-20\input-20-test.txt";
+            string fileName = @"C:\Users\wolfg\source\repos\AdventofCode2020\AdventofCode-20\input-20.txt";
             System.IO.StreamReader file = new System.IO.StreamReader(fileName);
 
             Console.WriteLine(fileName);
@@ -639,10 +800,14 @@ namespace AdventOfCode_20
             int layer = 0;
             Matrix starter = null;
             List<Matrix> pieces_copy = new List<Matrix>(pieces);
+            Dictionary<Matrix, List<Matrix>> matches = new Dictionary<Matrix, List<Matrix>>();
+            Dictionary<Matrix, List<Matrix>> newmatches;
             while (pieces.Count > 0)
             {
                 side = (int)Math.Sqrt(pieces.Count);
-                (starter, outer_layer) = solve_puzzle(pieces, starter);
+                (starter, outer_layer, newmatches) = solve_puzzle(pieces, starter);
+                matches = matches.Concat(newmatches).GroupBy(d => d.Key).ToDictionary(d => d.Key, d => d.First().Value);
+
                 Console.WriteLine("----- Layer -----");
                 for (int i  = 0; i < outer_layer.Count; i++)
                 {
@@ -703,12 +868,202 @@ namespace AdventOfCode_20
                 Console.WriteLine();
             }
 
+            orient_puzzle(puzzle, matches);
+
             print_puzzle(puzzle);
 
-            Console.WriteLine(single_string_puzzle(puzzle));
+            Matrix part2combined = new Matrix(0, string_array_puzzle(puzzle));
+            Console.WriteLine(part2combined.SimpleString());
+
+            (int monster_count, int total_hashes) = find_sea_monsters(part2combined);
+            Console.WriteLine($"Sea monsters found: {monster_count}\nTotal Hashes Left: {total_hashes}");
         }
 
-        private static Tuple<Matrix, List<Matrix>> solve_puzzle(List<Matrix> pieces, Matrix starter = null)
+        private static (int monster_count, int total_hashes) find_sea_monsters(Matrix part2combined)
+        {
+            string[] seamonster = @"                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   ".Split("\r\n");
+
+            int monster_count = 0;
+            int total_hashes = Regex.Matches(part2combined.SimpleString(), "#").Count();
+            bool match = true;
+
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    List<string> current = part2combined.SimpleStrings();
+                    for (int k = 0; k < current[0].Length - seamonster[0].Length; k += 1)
+                    {
+                        for (int l = 0; l < current.Count - seamonster.Length; l += 1)
+                        {
+                            match = true;
+                            for (int y = 0; y < seamonster.Length; y++)
+                            {
+                                for (int x = 0; x < seamonster[0].Length; x++)
+                                {
+                                    if (seamonster[y][x] == '#' && current[l + y][k + x] != '#')
+                                    {
+                                        match = false;
+                                        break;
+                                    }
+                                }
+                                if (!match)
+                                {
+                                    break;
+                                }
+                            }
+                            if (match)
+                            {
+                                monster_count += 1;
+                            }
+                        }
+                    }
+                    if (monster_count > 0)
+                    {
+                        break;
+                    } else
+                    {
+                        part2combined.ClockwiseRotate();
+                    }
+                }
+                if (monster_count > 0)
+                {
+                    break;
+                } else
+                {
+                    part2combined.HorizontalFlip();
+                }
+            }
+
+            return (monster_count, total_hashes - (monster_count * 15));
+        }
+
+        private static void orient_puzzle(Matrix[][] puzzle, Dictionary<Matrix, List<Matrix>> matches)
+        {
+            int i = 0, j = 0, candidate = 0;
+            Matrix swapped = null;
+            bool worked;
+            int original_x = 0, original_y = 0;
+            int swapped_x = 0, swapped_y = 0;
+            int list1 = 0, list2 = 0, list3 = 0;
+
+            try
+            {
+                for (i = 0; i < puzzle.Length - 1; i++)
+                {
+                    for (j = 0; j < puzzle.Length - 1; j++)
+                    {
+                        // Orient(top, bottom, right)
+                            Matrix.JointOrient(puzzle[i][j], puzzle[i + 1][j], puzzle[i][j + 1]);
+                            if (candidate > 0)
+                            {
+                                // reset exception
+                                candidate = 0;
+                                swapped = null;
+                                swapped_x = 0;
+                                swapped_y = 0;
+                                list1 = 0;
+                                list2 = 0;
+                                list3 = 0;
+                            }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // TODO SWAP THEM AND SEE?
+                Console.WriteLine("-- Exception Raised --");
+                // puzzle[i][j] could be wrong
+                // puzzle[i + 1][j] could be wrong
+                // puzzle[i][j + 1] could be wrong
+                list1 = matches[puzzle[i][j]].Count;
+                list2 = matches[puzzle[i + 1][j]].Count;
+                list3 = matches[puzzle[i][j + 1]].Count;
+
+                if (candidate < list1)
+                {
+                    if (candidate > 0)
+                    {
+                        // put it back
+                        puzzle[swapped_y][swapped_x] = puzzle[original_y][original_x];
+                        puzzle[original_y][original_x] = swapped;
+                    }
+                    swapped = puzzle[i][j];
+                    (worked, swapped_y, swapped_x) = swapout(puzzle[i][j], i, j, candidate, puzzle, matches);
+                    original_y = i;
+                    original_x = j;
+                }
+                else if (candidate - list1 < list2)
+                {
+                    if (candidate > 0)
+                    {
+                        // put it back
+                        puzzle[swapped_y][swapped_x] = puzzle[original_y][original_x];
+                        puzzle[original_y][original_x] = swapped;
+                    }
+                    swapped = puzzle[i + 1][j];
+                    (worked, swapped_y, swapped_x) = swapout(puzzle[i + 1][j], i + 1, j, candidate - list1, puzzle, matches);
+                    original_y = i + 1;
+                    original_x = j;
+                }
+                else if (candidate - list1 - list2 < list3)
+                {
+                    if (candidate > 0)
+                    {
+                        // put it back
+                        puzzle[swapped_y][swapped_x] = puzzle[original_y][original_x];
+                        puzzle[original_y][original_x] = swapped;
+                    }
+                    swapped = puzzle[i][j + 1];
+                    (worked, swapped_y, swapped_x) = swapout(puzzle[i][j + 1], i, j + 1, candidate - list1 - list2, puzzle, matches);
+                    original_y = i;
+                    original_x = j + 1;
+                }
+                else
+                {
+                    //throw;
+                }
+
+                j -= 1; // repeat?
+                candidate++;
+            }
+            Matrix.JointOrientLast(puzzle[i][j], puzzle[i - 1][j], puzzle[i][j - 1]);
+        }
+
+        private static (bool, int, int) swapout(Matrix matrix, int pos_y, int pos_x, int candidate, Matrix[][] puzzle, Dictionary<Matrix, List<Matrix>> matches)
+        {
+            if (candidate >= matches[matrix].Count)
+            {
+                return (false, -1, -1);
+            }
+
+            Matrix swapper = matches[matrix][candidate];
+
+            int i = 0, j = 0;
+            for (i = 0; i < puzzle.Length; i++)
+            {
+                for (j = 0; j < puzzle[i].Length; j++)
+                {
+                    if (puzzle[i][j] == swapper)
+                    {
+                        swapper = puzzle[i][j];
+                        puzzle[pos_y][pos_x] = swapper;
+                        puzzle[i][j] = matrix;
+                        break;
+                    }
+                }
+                if (puzzle[pos_y][pos_x] == swapper)
+                {
+                    break;
+                }
+            }
+
+            return (false, i, j);
+        }
+
+        private static Tuple<Matrix, List<Matrix>, Dictionary<Matrix, List<Matrix>>> solve_puzzle(List<Matrix> pieces, Matrix starter = null)
         {
             List<Matrix> corners = new List<Matrix>();
             List<Matrix> center = new List<Matrix>();
@@ -775,7 +1130,7 @@ namespace AdventOfCode_20
                 throw new Exception();
             }
 
-            return new Tuple<Matrix, List<Matrix>>(starter, outer_layer);
+            return new Tuple<Matrix, List<Matrix>, Dictionary<Matrix, List<Matrix>>>(starter, outer_layer, matches);
         }
 
         static void Main(string[] args)
