@@ -1,0 +1,3 @@
+a b c (contains a1, a2)
+d e c (contains a1)
+a b c (contains a2)
