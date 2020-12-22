@@ -7,7 +7,7 @@ namespace AdventOfCode_21
 {
     class Program
     {
-        static void part1()
+        static Dictionary<string, HashSet<string>> part1()
         {
             string fileName = @"C:\Users\wolfg\source\repos\AdventofCode2020\AdventofCode-21\input-21.txt";
             System.IO.StreamReader file = new System.IO.StreamReader(fileName);
@@ -85,10 +85,54 @@ namespace AdventOfCode_21
             }
 
             Console.WriteLine($"Zero Allergen Ingredient occurrences: {count}");
+            return allergens_and_ingredients;
         }
+        
         static void Main(string[] args)
         {
-            part1();
+            Console.WriteLine(part2(part1()));
+        }
+
+        private static string part2(Dictionary<string, HashSet<string>> part1)
+        {
+            bool changed = true;
+            int counter = 1;
+
+            while (changed)
+            {
+                changed = false;
+                foreach (string allergen_origin in part1.Keys)
+                {
+                    foreach (string allergen_other in part1.Keys)
+                    {
+                        if (allergen_origin == allergen_other || part1[allergen_other].Count > counter || part1[allergen_origin].Count == 1)
+                        {
+                            continue;
+                        }
+
+                        part1[allergen_origin].ExceptWith(part1[allergen_other]);
+                        changed = true;
+                    }
+                }
+                counter++;
+            }
+
+            // Problem statement guarantees one ingredient per allergen now
+            List<string> sorted_allergens = part1.Keys.ToList();
+            sorted_allergens.Sort();
+
+            List<string> sorted_ingredients = new List<string>();
+
+            foreach (string allergen in sorted_allergens)
+            {
+                if (part1[allergen].Count > 1)
+                {
+                    throw new Exception();
+                }
+                sorted_ingredients.Add(part1[allergen].ToList()[0]);
+            }
+
+            return string.Join(",", sorted_ingredients);
         }
     }
 }
