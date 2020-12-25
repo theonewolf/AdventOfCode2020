@@ -113,6 +113,7 @@ namespace AdventOfCode_25
             static void Main(string[] args)
             {
                 part1();
+                // No second challenge!
                 //part2();
             }
         }
