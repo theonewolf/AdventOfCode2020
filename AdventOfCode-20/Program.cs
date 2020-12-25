@@ -144,8 +144,8 @@ namespace AdventOfCode_20
             bool[] ret = { false, false, false, false };
 
             // match top and bottoms
-            char[] top = matrix[0];
-            char[] bottom = matrix[matrix.Length - 1];
+            char[] top = Top();
+            char[] bottom = Bottom();
 
             char[] other_top = other.Top();
             char[] other_bottom = other.Bottom();
@@ -396,13 +396,8 @@ namespace AdventOfCode_20
             matrix = newMatrix;
         }
 
-        public static void JointOrient(Matrix corner, Matrix bottom, Matrix right)
+        public static bool JointOrient(Matrix corner, Matrix bottom, Matrix right)
         {
-            bool[] corner_match_bottom = corner.MatchSides(bottom);
-            bool[] corner_match_right = corner.MatchSides(right);
-            bool[] bottom_match_corner = bottom.MatchSides(corner);
-            bool[] right_match_corner = right.MatchSides(corner);
-
             bool found = false;
             for (int i = 0; i < 2; i++)
             {
@@ -421,7 +416,7 @@ namespace AdventOfCode_20
                                         found = true;
                                         break;
                                     }
-                                    bottom.ClockwiseRotate();
+                                    if (!bottom.oriented) bottom.ClockwiseRotate();
                                 }
                                 if (found)
                                 {
@@ -429,7 +424,7 @@ namespace AdventOfCode_20
                                 }
                                 else
                                 {
-                                    right.ClockwiseRotate();
+                                    if (!right.oriented) right.ClockwiseRotate();
                                 }
                             }
                             if (found)
@@ -438,7 +433,7 @@ namespace AdventOfCode_20
                             }
                             else
                             {
-                                corner.ClockwiseRotate();
+                                if (!corner.oriented) corner.ClockwiseRotate();
                             }
                         }
                         if (found)
@@ -447,7 +442,7 @@ namespace AdventOfCode_20
                         }
                         else
                         {
-                            right.HorizontalFlip();
+                            if (!right.oriented) right.HorizontalFlip();
                         }
                     }
                     if (found)
@@ -456,7 +451,7 @@ namespace AdventOfCode_20
                     }
                     else
                     {
-                        bottom.HorizontalFlip();
+                        if (!bottom.oriented) bottom.HorizontalFlip();
                     }
                 }
                 if (found)
@@ -465,24 +460,16 @@ namespace AdventOfCode_20
                 }
                 else
                 {
-                    corner.HorizontalFlip();
+                     if (!corner.oriented) corner.HorizontalFlip();
                 }
             }
 
-            if (!found)
-            {
-                throw new Exception();
-            }
+            return found;
         }
 
         // TODO
-        public static void JointOrientLast(Matrix corner, Matrix top, Matrix left)
+        public static bool JointOrientLastRight(Matrix corner, Matrix top, Matrix left)
         {
-            bool[] corner_match_top = corner.MatchSides(top);
-            bool[] corner_match_left = corner.MatchSides(left);
-            bool[] top_match_corner = top.MatchSides(corner);
-            bool[] left_match_corner = left.MatchSides(corner);
-
             bool found = false;
             for (int i = 0; i < 2; i++)
             {
@@ -501,7 +488,7 @@ namespace AdventOfCode_20
                                         found = true;
                                         break;
                                     }
-                                    top.ClockwiseRotate();
+                                    if (!top.oriented) top.ClockwiseRotate();
                                 }
                                 if (found)
                                 {
@@ -509,7 +496,7 @@ namespace AdventOfCode_20
                                 }
                                 else
                                 {
-                                    left.ClockwiseRotate();
+                                    if (!left.oriented) left.ClockwiseRotate();
                                 }
                             }
                             if (found)
@@ -518,7 +505,7 @@ namespace AdventOfCode_20
                             }
                             else
                             {
-                                corner.ClockwiseRotate();
+                                if (!corner.oriented) corner.ClockwiseRotate();
                             }
                         }
                         if (found)
@@ -527,7 +514,7 @@ namespace AdventOfCode_20
                         }
                         else
                         {
-                            left.HorizontalFlip();
+                            if (!left.oriented) left.HorizontalFlip();
                         }
                     }
                     if (found)
@@ -536,7 +523,7 @@ namespace AdventOfCode_20
                     }
                     else
                     {
-                        top.HorizontalFlip();
+                        if (!top.oriented) top.HorizontalFlip();
                     }
                 }
                 if (found)
@@ -545,14 +532,83 @@ namespace AdventOfCode_20
                 }
                 else
                 {
-                    corner.HorizontalFlip();
+                    if (!corner.oriented) corner.HorizontalFlip();
                 }
             }
 
-            if (!found)
+            return found;
+        }
+
+        // TODO
+        public static bool JointOrientLastLeft(Matrix corner, Matrix top, Matrix right)
+        {
+            bool found = false;
+            for (int i = 0; i < 2; i++)
             {
-                    throw new Exception();
+                for (int j = 0; j < 2; j++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        for (int x = 0; x < 4; x++)
+                        {
+                            for (int y = 0; y < 4; y++)
+                            {
+                                for (int z = 0; z < 4; z++)
+                                {
+                                    if (corner.ExactMatched(top, 0) && corner.ExactMatched(right, 3))
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                    if (!top.oriented) top.ClockwiseRotate();
+                                }
+                                if (found)
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    if (!right.oriented) right.ClockwiseRotate();
+                                }
+                            }
+                            if (found)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                if (!corner.oriented) corner.ClockwiseRotate();
+                            }
+                        }
+                        if (found)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            if (!right.oriented) right.HorizontalFlip();
+                        }
+                    }
+                    if (found)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        if (!top.oriented) top.HorizontalFlip();
+                    }
+                }
+                if (found)
+                {
+                    break;
+                }
+                else
+                {
+                    if (!corner.oriented) corner.HorizontalFlip();
+                }
             }
+
+            return found;
         }
     }
 
@@ -650,16 +706,6 @@ class Program
                         break;
                     }
                 }
-            }
-
-            // Finally configure with original corner
-            // orient bottom to top
-            if (matches.Count > 1)
-            {
-                Matrix.Orient(clockwise_ordering[0], clockwise_ordering[i - 1], new bool[] { false, true, false, false }, new bool[] { true, false, false, false });
-                Console.WriteLine(" --- DEBUG (B to T) --- ");
-                Console.WriteLine(clockwise_ordering[0]);
-                Console.WriteLine(clockwise_ordering[i - 1]);
             }
 
             if (matches.Count > 1 && !matches[clockwise_ordering[0]].Contains(clockwise_ordering[clockwise_ordering.Count - 1]))
@@ -868,8 +914,19 @@ class Program
                 Console.WriteLine();
             }
 
-            orient_puzzle(puzzle, matches);
+            //orient_puzzle(puzzle, matches);
 
+            side = (int) Math.Sqrt(pieces_copy.Count);
+            puzzle = new Matrix[side][];
+
+            for (int i = 0; i < puzzle.Length; i++)
+            {
+                puzzle[i] = new Matrix[side];
+            }
+
+            new_solver(puzzle, pieces_copy, matches);
+
+            
             print_puzzle(puzzle);
 
             Matrix part2combined = new Matrix(0, string_array_puzzle(puzzle));
@@ -877,6 +934,114 @@ class Program
 
             (int monster_count, int total_hashes) = find_sea_monsters(part2combined);
             Console.WriteLine($"Sea monsters found: {monster_count}\nTotal Hashes Left: {total_hashes}");
+        }
+
+        private static void new_solver(Matrix[][] puzzle, List<Matrix> pieces, Dictionary<Matrix, List<Matrix>> matches)
+        {
+            HashSet<Matrix> picked = new HashSet<Matrix>();
+
+            // Pick top left corner
+            int counter = 0;
+            foreach (Matrix m in matches.Keys)
+            {
+                if (matches[m].Count == 2 && counter == 0)
+                {
+                    puzzle[0][0] = m;
+                    picked.Add(m);
+                }
+
+                if (matches[m].Count == 2)
+                {
+                    counter++;
+                }
+            }
+
+            bool oriented = false;
+            int i = 0, j = 0;
+            for (i = 0; i < puzzle.Length - 1; i++)
+            {
+                for (j = 0; j < puzzle[i].Length - 1; j++)
+                {
+                    Matrix corner = puzzle[i][j];
+                    oriented = false;
+
+                    //Console.WriteLine($"corner == {i},{j}");
+                    //Console.WriteLine($"bottom == {i+1},{j}");
+                    //Console.WriteLine($"right == {i},{j+1}");
+
+                    Matrix current_right, current_bottom;
+
+                    foreach (Matrix right in matches[corner])
+                    {
+                        if (puzzle[i][j + 1] != null)
+                        {
+                            current_right = puzzle[i][j + 1];
+                        }
+                        else if (picked.Contains(right))
+                        {
+                            continue;
+                        } else
+                        {
+                            current_right = right;
+                        }
+
+                        foreach (Matrix bottom in matches[corner])
+                        {
+                            if (puzzle[i + 1][j] != null)
+                            {
+                                current_bottom = puzzle[i + 1][j];
+                            } else if (picked.Contains(bottom))
+                            {
+                                continue;
+                            } else
+                            {
+                                current_bottom = bottom;
+                            }
+
+                            if (corner == null) throw new Exception();
+                            if (current_bottom == null) throw new Exception();
+                            if (current_right == null) throw new Exception();
+
+                            if (Matrix.JointOrient(corner, current_bottom, current_right))
+                            {
+                                puzzle[i + 1][j] = current_bottom;
+                                puzzle[i][j + 1] = current_right;
+                                picked.Add(current_bottom);
+                                picked.Add(current_right);
+                                corner.oriented = true;
+                                current_bottom.oriented = true;
+                                current_right.oriented = true;
+                                oriented = true;
+                                Console.WriteLine($"Set pieces: {i},{j} and {i + 1},{j} and {i},{j + 1}");
+                                break;
+                            }
+                        }
+                        if (oriented) break;
+                    }
+
+                    //if (puzzle[i + 1][j] == null || puzzle[i][j + 1] == null) throw new Exception();
+                }
+            }
+
+            foreach (Matrix candidate in pieces)
+            {
+                if (!picked.Contains(candidate))
+                {
+                    // Bottom right
+                    if (Matrix.JointOrientLastRight(candidate, puzzle[i - 1][j], puzzle[i][j - 1]))
+                    {
+                        puzzle[i][j] = candidate;
+                        candidate.oriented = true;
+                    }
+
+                    // Bottom left
+                    if (Matrix.JointOrientLastLeft(candidate, puzzle[i - 1][0], puzzle[i][1]))
+                    {
+                        puzzle[i][0] = candidate;
+                        candidate.oriented = true;
+                    }
+                }
+            } 
         }
 
         private static (int monster_count, int total_hashes) find_sea_monsters(Matrix part2combined)
@@ -942,125 +1107,98 @@ class Program
 
         private static void orient_puzzle(Matrix[][] puzzle, Dictionary<Matrix, List<Matrix>> matches)
         {
-            int i = 0, j = 0, candidate = 0;
-            Matrix swapped = null;
-            bool worked;
-            int original_x = 0, original_y = 0;
-            int swapped_x = 0, swapped_y = 0;
-            int list1 = 0, list2 = 0, list3 = 0;
+            int i = 0, j = 0;
+            bool oriented, swapped = true;
 
-            try
+            while (swapped)
             {
+                swapped = false;
+
                 for (i = 0; i < puzzle.Length - 1; i++)
                 {
                     for (j = 0; j < puzzle.Length - 1; j++)
                     {
                         // Orient(top, bottom, right)
-                            Matrix.JointOrient(puzzle[i][j], puzzle[i + 1][j], puzzle[i][j + 1]);
-                            if (candidate > 0)
+                        oriented = Matrix.JointOrient(puzzle[i][j], puzzle[i + 1][j], puzzle[i][j + 1]);
+                        if (!oriented)
+                        {
+                            // assume top is correct, try all puzzle pieces as right, and all as bottom
+                            foreach (Matrix match1 in matches[puzzle[i][j]].Where(x => x != puzzle[i][j]))
                             {
-                                // reset exception
-                                candidate = 0;
-                                swapped = null;
-                                swapped_x = 0;
-                                swapped_y = 0;
-                                list1 = 0;
-                                list2 = 0;
-                                list3 = 0;
+                                foreach (Matrix match2 in matches[puzzle[i][j]].Where(x => x != puzzle[i][j] && x != match1))
+                                {
+                                    oriented = Matrix.JointOrient(puzzle[i][j], match1, match2);
+                                    if (oriented)
+                                    {
+                                        swapout(puzzle, match1, puzzle[i + 1][j]);
+                                        swapout(puzzle, match2, puzzle[i][j + 1]);
+                                        break;
+                                    }
+                                }
+                                if (oriented) break;
                             }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                // TODO SWAP THEM AND SEE?
-                Console.WriteLine("-- Exception Raised --");
-                // puzzle[i][j] could be wrong
-                // puzzle[i + 1][j] could be wrong
-                // puzzle[i][j + 1] could be wrong
-                list1 = matches[puzzle[i][j]].Count;
-                list2 = matches[puzzle[i + 1][j]].Count;
-                list3 = matches[puzzle[i][j + 1]].Count;
+                        }
 
-                if (candidate < list1)
-                {
-                    if (candidate > 0)
-                    {
-                        // put it back
-                        puzzle[swapped_y][swapped_x] = puzzle[original_y][original_x];
-                        puzzle[original_y][original_x] = swapped;
+                        if (!oriented)
+                        {
+                            throw new Exception();
+                        }
                     }
-                    swapped = puzzle[i][j];
-                    (worked, swapped_y, swapped_x) = swapout(puzzle[i][j], i, j, candidate, puzzle, matches);
-                    original_y = i;
-                    original_x = j;
-                }
-                else if (candidate - list1 < list2)
-                {
-                    if (candidate > 0)
-                    {
-                        // put it back
-                        puzzle[swapped_y][swapped_x] = puzzle[original_y][original_x];
-                        puzzle[original_y][original_x] = swapped;
-                    }
-                    swapped = puzzle[i + 1][j];
-                    (worked, swapped_y, swapped_x) = swapout(puzzle[i + 1][j], i + 1, j, candidate - list1, puzzle, matches);
-                    original_y = i + 1;
-                    original_x = j;
-                }
-                else if (candidate - list1 - list2 < list3)
-                {
-                    if (candidate > 0)
-                    {
-                        // put it back
-                        puzzle[swapped_y][swapped_x] = puzzle[original_y][original_x];
-                        puzzle[original_y][original_x] = swapped;
-                    }
-                    swapped = puzzle[i][j + 1];
-                    (worked, swapped_y, swapped_x) = swapout(puzzle[i][j + 1], i, j + 1, candidate - list1 - list2, puzzle, matches);
-                    original_y = i;
-                    original_x = j + 1;
-                }
-                else
-                {
-                    //throw;
                 }
 
-                j -= 1; // repeat?
-                candidate++;
+                oriented = Matrix.JointOrientLastRight(puzzle[i][j], puzzle[i - 1][j], puzzle[i][j - 1]);
+                swapped = false;
+                if (!oriented)
+                {
+                    // assume top is correct, try all puzzle pieces as right, and all as bottom
+                    foreach (Matrix match1 in matches[puzzle[i][j]].Where(x => x != puzzle[i][j]))
+                    {
+                        foreach (Matrix match2 in matches[puzzle[i][j]].Where(x => x != puzzle[i][j] && x != match1))
+                        {
+                            oriented = Matrix.JointOrientLastRight(puzzle[i][j], match1, match2);
+                            if (oriented)
+                            {
+                                swapout(puzzle, match1, puzzle[i - 1][j]);
+                                swapout(puzzle, match2, puzzle[i][j - 1]);
+                                break;
+                            }
+                        }
+                        if (oriented) break;
+                    }
+                }
+
+                if (!oriented)
+                {
+                    throw new Exception();
+                }
+
             }
-            Matrix.JointOrientLast(puzzle[i][j], puzzle[i - 1][j], puzzle[i][j - 1]);
         }
 
-        private static (bool, int, int) swapout(Matrix matrix, int pos_y, int pos_x, int candidate, Matrix[][] puzzle, Dictionary<Matrix, List<Matrix>> matches)
+        private static void swapout(Matrix[][] puzzle, Matrix m1, Matrix m2)
         {
-            if (candidate >= matches[matrix].Count)
+            int posM1i = -1, posM1j = -1, posM2i = -1, posM2j = -1;
+            for (int i = 0; i < puzzle.Length; i++)
             {
-                return (false, -1, -1);
-            }
-
-            Matrix swapper = matches[matrix][candidate];
-
-            int i = 0, j = 0;
-            for (i = 0; i < puzzle.Length; i++)
-            {
-                for (j = 0; j < puzzle[i].Length; j++)
+                for (int j = 0; j < puzzle[i].Length; j++)
                 {
-                    if (puzzle[i][j] == swapper)
+                    if (puzzle[i][j] == m1)
                     {
-                        swapper = puzzle[i][j];
-                        puzzle[pos_y][pos_x] = swapper;
-                        puzzle[i][j] = matrix;
-                        break;
+                        posM1i = i;
+                        posM1j = j;
+                    }
+
+                    if (puzzle[i][j] == m2)
+                    {
+                        posM2i = i;
+                        posM2j = j;
                     }
                 }
-                if (puzzle[pos_y][pos_x] == swapper)
-                {
-                    break;
-                }
             }
 
-            return (false, i, j);
+            Matrix temp = puzzle[posM1i][posM1j];
+            puzzle[posM1i][posM1j] = puzzle[posM2i][posM2j];
+            puzzle[posM2i][posM2j] = temp;
         }
 
         private static Tuple<Matrix, List<Matrix>, Dictionary<Matrix, List<Matrix>>> solve_puzzle(List<Matrix> pieces, Matrix starter = null)
